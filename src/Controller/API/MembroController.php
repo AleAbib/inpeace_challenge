@@ -24,6 +24,24 @@ class MembroController extends AbstractController
         private MembroRepository $membroRepository 
     ) {}
 
+    #[Route('/igreja/{id}/membros', name: 'api_membros_por_igreja_list', methods: ['GET'])]
+    public function listMembrosPorIgreja(int $id): JsonResponse 
+    {
+        $igreja = $this->igrejaRepository->find($id);
+
+        if (!$igreja) {
+            return $this->json(['error' => 'Igreja não encontrada.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $membros = $igreja->getMembros();
+
+        return $this->json(
+            $membros, 
+            Response::HTTP_OK, 
+            [], 
+            ['groups' => ['membro:read', 'igreja:read']] 
+        );
+    }
     /**
      * Endpoint para CADASTRAR um novo Membro.
      * Responde a requisições POST em /api/membro
@@ -105,5 +123,6 @@ class MembroController extends AbstractController
         
 
     }
+
 
 }
