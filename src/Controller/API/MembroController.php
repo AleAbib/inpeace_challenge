@@ -24,6 +24,22 @@ class MembroController extends AbstractController
         private MembroRepository $membroRepository 
     ) {}
 
+    #[Route('/membro/{id}', name: 'api_membro_delete', methods: ['DELETE'])]
+    public function deleteMembro(int $id): JsonResponse
+    {
+        $membro = $this->membroRepository->find($id);
+
+        if (!$membro) {
+            return $this->json(['error' => 'Membro não encontrado.'], Response::HTTP_NOT_FOUND); // 404
+        }
+
+
+        $this->em->remove($membro);
+        $this->em->flush(); 
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
     #[Route('/membro/{id}', name: 'api_membro_update', methods: ['PATCH'])]
     public function updateMembro(int $id, Request $request): JsonResponse
     {
