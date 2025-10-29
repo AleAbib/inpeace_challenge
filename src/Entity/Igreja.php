@@ -39,7 +39,7 @@ class Igreja
     #[ORM\Column(length: 255, unique: true)]
     private ?string $codigoInterno = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $telefone = null;
 
     #[Assert\NotBlank(message: 'O logradouro não pode estar em branco.')]
