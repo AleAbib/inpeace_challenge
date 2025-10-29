@@ -73,8 +73,8 @@ class IgrejaController extends AbstractController
 
         return $this->json([
             'message' => 'Igreja cadastrada com sucesso!',
-            'id' => $igreja->getId(), 
-            'data' => $igreja, 
-        ], Response::HTTP_CREATED); 
+            'id' => $igreja->getId(),
+            'data' => $igreja,
+        ], Response::HTTP_CREATED, [], ['groups' => 'igreja:read']);
     }
 }

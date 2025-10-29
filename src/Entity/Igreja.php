@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\IgrejaRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: IgrejaRepository::class)]
 class Igreja
@@ -13,6 +16,7 @@ class Igreja
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['igreja:read'])]
     private ?int $id = null;
 
     #[Assert\NotBlank(message: 'O nome não pode estar em branco.')]
@@ -21,6 +25,7 @@ class Igreja
         minMessage: 'O nome deve ter pelo menos {{ limit }} caracteres.'
     )]
     #[ORM\Column(length: 255)]
+    #[Groups(['igreja:read'])]
     private ?string $nome = null;
 
     #[Assert\NotBlank(message: 'O tipo do documento não pode estar em branco.')]
@@ -29,6 +34,7 @@ class Igreja
         message: 'O tipo do documento deve ser "CPF" ou "CNPJ".'
     )]
     #[ORM\Column(length: 20)]
+    #[Groups(['igreja:read'])]
     private ?string $docTipo = null;
 
     #[Assert\NotBlank(message: 'O número do documento não pode estar em branco.')]
@@ -37,17 +43,21 @@ class Igreja
 
     #[Assert\NotBlank(message: 'O código interno não pode estar em branco.')]
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['igreja:read'])]
     private ?string $codigoInterno = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['igreja:read'])]
     private ?string $telefone = null;
 
     #[Assert\NotBlank(message: 'O logradouro não pode estar em branco.')]
     #[ORM\Column(length: 255)]
+    #[Groups(['igreja:read'])]
     private ?string $endLogradouro = null;
 
     #[Assert\NotBlank(message: 'O número do endereço não pode estar em branco.')]
     #[ORM\Column(length: 30)]
+    #[Groups(['igreja:read'])]
     private ?string $endNumero = null;
 
     #[ORM\Column(length: 100, nullable: true)]
@@ -80,6 +90,14 @@ class Igreja
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dataUltimaAlteracao = null;
+
+    #[ORM\OneToMany(targetEntity: Membro::class, mappedBy: 'igreja')]
+    private Collection $membros;
+
+    public function __construct()
+    {
+        $this->membros = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -262,6 +280,36 @@ class Igreja
     public function setDataUltimaAlteracao(?\DateTimeInterface $dataUltimaAlteracao): static
     {
         $this->dataUltimaAlteracao = $dataUltimaAlteracao;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Membro>
+     */
+    public function getMembros(): Collection
+    {
+        return $this->membros;
+    }
+
+    public function addMembro(Membro $membro): static
+    {
+        if (!$this->membros->contains($membro)) {
+            $this->membros->add($membro);
+            $membro->setIgreja($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembro(Membro $membro): static
+    {
+        if ($this->membros->removeElement($membro)) {
+            // set the owning side to null (unless already changed)
+            if ($membro->getIgreja() === $this) {
+                $membro->setIgreja(null);
+            }
+        }
 
         return $this;
     }

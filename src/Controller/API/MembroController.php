@@ -101,7 +101,7 @@ class MembroController extends AbstractController
         return $this->json([
             'message' => 'Membro cadastrado com sucesso!',
             'data' => $membro,
-        ], Response::HTTP_CREATED);
+        ], Response::HTTP_CREATED, [], ['groups' => ['membro:read', 'igreja:read']]);
         
 
     }
