@@ -24,6 +24,23 @@ class MembroController extends AbstractController
         private MembroRepository $membroRepository 
     ) {}
 
+    #[Route('/membro/{id}', name: 'api_membro_show', methods: ['GET'])]
+    public function showMembro(int $id): JsonResponse 
+    {
+        $membro = $this->membroRepository->find($id);
+
+        if (!$membro) {
+            return $this->json(['error' => 'Membro não encontrado.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json(
+            $membro, 
+            Response::HTTP_OK, 
+            [], 
+            ['groups' => ['membro:read', 'igreja:read']] 
+        );
+    }
+
     #[Route('/igreja/{id}/membros', name: 'api_membros_por_igreja_list', methods: ['GET'])]
     public function listMembrosPorIgreja(int $id): JsonResponse 
     {
