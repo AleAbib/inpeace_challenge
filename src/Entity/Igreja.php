@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\IgrejaRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: IgrejaRepository::class)]
 class Igreja
@@ -14,42 +15,63 @@ class Igreja
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: 'O nome não pode estar em branco.')]
+    #[Assert\Length(
+        min: 3,
+        minMessage: 'O nome deve ter pelo menos {{ limit }} caracteres.'
+    )]
     #[ORM\Column(length: 255)]
     private ?string $nome = null;
 
+    #[Assert\NotBlank(message: 'O tipo do documento não pode estar em branco.')]
+    #[Assert\Choice(
+        choices: ['CPF', 'CNPJ'],
+        message: 'O tipo do documento deve ser "CPF" ou "CNPJ".'
+    )]
     #[ORM\Column(length: 20)]
     private ?string $docTipo = null;
 
+    #[Assert\NotBlank(message: 'O número do documento não pode estar em branco.')]
     #[ORM\Column(length: 50)]
     private ?string $docNumero = null;
 
+    #[Assert\NotBlank(message: 'O código interno não pode estar em branco.')]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $codigoInterno = null;
 
     #[ORM\Column(length: 50)]
     private ?string $telefone = null;
 
+    #[Assert\NotBlank(message: 'O logradouro não pode estar em branco.')]
     #[ORM\Column(length: 255)]
     private ?string $endLogradouro = null;
 
+    #[Assert\NotBlank(message: 'O número do endereço não pode estar em branco.')]
     #[ORM\Column(length: 30)]
     private ?string $endNumero = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $endComplemento = null;
 
+    #[Assert\NotBlank(message: 'A cidade não pode estar em branco.')]
     #[ORM\Column(length: 100)]
     private ?string $endCidade = null;
 
+    #[Assert\NotBlank(message: 'O estado não pode estar em branco.')]
+    #[Assert\Length(min: 2, max: 2, exactMessage: 'O estado deve ter 2 caracteres (ex: SP).')]
     #[ORM\Column(length: 2)]
     private ?string $endEstado = null;
 
+    #[Assert\NotBlank(message: 'O CEP não pode estar em branco.')]
     #[ORM\Column(length: 10)]
     private ?string $endCep = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $website = null;
 
+    #[Assert\NotBlank(message: 'O limite de membros não pode estar em branco.')]
+    #[Assert\Type(type: 'integer', message: 'O limite de membros deve ser um número inteiro.')]
+    #[Assert\Positive(message: 'O limite de membros deve ser um número positivo.')]
     #[ORM\Column]
     private ?int $limiteMembros = null;
 
