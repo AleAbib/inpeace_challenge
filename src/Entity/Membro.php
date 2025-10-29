@@ -6,6 +6,7 @@ use App\Repository\MembroRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MembroRepository::class)]
 class Membro
@@ -13,68 +14,84 @@ class Membro
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['membro:read'])]
     private ?int $id = null;
 
     #[Assert\NotBlank(message: 'O nome não pode estar em branco.')]
     #[Assert\Length(min: 3, minMessage: 'O nome deve ter pelo menos {{ limit }} caracteres.')]
     #[ORM\Column(length: 255)]
+    #[Groups(['membro:read'])]
     private ?string $nome = null;
 
     #[Assert\NotBlank(message: 'O tipo do documento não pode estar em branco.')]
     #[Assert\Choice(choices: ['CPF', 'CNPJ'], message: 'O tipo do documento deve ser "CPF" ou "CNPJ".')]
     #[ORM\Column(length: 20)]
+    #[Groups(['membro:read'])]
     private ?string $docTipo = null;
 
     #[Assert\NotBlank(message: 'O número do documento não pode estar em branco.')]
     #[ORM\Column(length: 50)]
+    #[Groups(['membro:read'])]
     private ?string $docNumero = null;
 
     #[Assert\NotBlank(message: 'A data de nascimento não pode estar em branco.')]
     #[Assert\LessThanOrEqual(value: 'today', message: 'A data de nascimento não pode ser uma data futura.')]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['membro:read'])]
     private ?\DateTimeInterface $dataNascimento = null;
 
     #[Assert\NotBlank(message: 'O email não pode estar em branco.')]
     #[Assert\Email(message: 'O email "{{ value }}" não é um email válido.')]
     #[ORM\Column(length: 255)]
+    #[Groups(['membro:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['membro:read'])]
     private ?string $telefone = null;
 
     #[Assert\NotBlank(message: 'O logradouro não pode estar em branco.')]
     #[ORM\Column(length: 255)]
+    #[Groups(['membro:read'])]
     private ?string $endLogradouro = null;
 
     #[Assert\NotBlank(message: 'O número do endereço não pode estar em branco.')]
     #[ORM\Column(length: 30)]
+    #[Groups(['membro:read'])]
     private ?string $endNumero = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['membro:read'])]
     private ?string $endComplemento = null;
 
     #[Assert\NotBlank(message: 'A cidade não pode estar em branco.')]
     #[ORM\Column(length: 100)]
+    #[Groups(['membro:read'])]
     private ?string $endCidade = null;
 
     #[Assert\NotBlank(message: 'O estado não pode estar em branco.')]
     #[Assert\Length(min: 2, max: 2, exactMessage: 'O estado deve ter 2 caracteres (ex: SP).')]
+    #[Groups(['membro:read'])]
     #[ORM\Column(length: 2)]
     private ?string $endEstado = null;
 
     #[Assert\NotBlank(message: 'O CEP não pode estar em branco.')]
     #[ORM\Column(length: 10)]
+    #[Groups(['membro:read'])]
     private ?string $endCep = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['membro:read'])]
     private ?\DateTimeInterface $dataCadastro = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['membro:read'])]
     private ?\DateTimeInterface $dataUltimaAlteracao = null;
 
     #[Assert\NotNull(message: 'A igreja é obrigatória.')] 
     #[ORM\ManyToOne(inversedBy: 'membros')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['membro:read'])]
     private ?Igreja $igreja = null;
 
     public function getId(): ?int
