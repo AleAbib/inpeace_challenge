@@ -139,7 +139,7 @@ class Igreja
         return $this->telefone;
     }
 
-    public function setTelefone(string $telefone): static
+    public function setTelefone(?string $telefone): static
     {
         $this->telefone = $telefone;
 
