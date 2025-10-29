@@ -24,6 +24,88 @@ class MembroController extends AbstractController
         private MembroRepository $membroRepository 
     ) {}
 
+    #[Route('/membro/{id}', name: 'api_membro_update', methods: ['PATCH'])]
+    public function updateMembro(int $id, Request $request): JsonResponse
+    {
+        $membro = $this->membroRepository->find($id);
+
+        if (!$membro) {
+            return $this->json(['error' => 'Membro não encontrado.'], Response::HTTP_NOT_FOUND); // 404
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (array_key_exists('email', $data) && $data['email'] !== $membro->getEmail()) {
+
+            $existingMembro = $this->membroRepository->findOneBy(['email' => $data['email'], 'igreja' => $membro->getIgreja()]);
+            if ($existingMembro) {
+                return $this->json(
+                    ['error' => 'Este email (' . $data['email'] . ') já está cadastrado para esta igreja.'],
+                    Response::HTTP_CONFLICT 
+                );
+            }
+            $membro->setEmail($data['email']);
+        }
+
+        if (array_key_exists('nome', $data)) {
+            $membro->setNome($data['nome']);
+        }
+        if (array_key_exists('docTipo', $data)) {
+            $membro->setDocTipo($data['docTipo']);
+        }
+        if (array_key_exists('docNumero', $data)) {
+            $membro->setDocNumero($data['docNumero']);
+        }
+        if (array_key_exists('telefone', $data)) {
+            $membro->setTelefone($data['telefone']);
+        }
+        if (array_key_exists('endLogradouro', $data)) {
+            $membro->setEndLogradouro($data['endLogradouro']);
+        }
+        if (array_key_exists('endNumero', $data)) {
+            $membro->setEndNumero($data['endNumero']);
+        }
+        if (array_key_exists('endCidade', $data)) {
+            $membro->setEndCidade($data['endCidade']);
+        }
+        if (array_key_exists('endEstado', $data)) {
+            $membro->setEndEstado($data['endEstado']);
+        }
+        if (array_key_exists('endCep', $data)) {
+            $membro->setEndCep($data['endCep']);
+        }
+        if (array_key_exists('endComplemento', $data)) {
+            $membro->setEndComplemento($data['endComplemento']);
+        }
+        if (array_key_exists('dataNascimento', $data)) {
+            try {
+                $membro->setDataNascimento(new \DateTime($data['dataNascimento']));
+            } catch (\Exception $e) {
+                return $this->json(['error' => 'Formato de dataNascimento inválido. Use YYYY-MM-DD.'], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        $membro->setDataUltimaAlteracao(new \DateTime());
+
+        $errors = $this->validator->validate($membro);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return $this->json(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST); 
+        }
+
+        $this->em->flush(); 
+
+        return $this->json(
+            $membro,
+            Response::HTTP_OK, 
+            [],
+            ['groups' => ['membro:read', 'igreja:read']]
+        );
+    }
+
     #[Route('/membro/{id}', name: 'api_membro_show', methods: ['GET'])]
     public function showMembro(int $id): JsonResponse 
     {
