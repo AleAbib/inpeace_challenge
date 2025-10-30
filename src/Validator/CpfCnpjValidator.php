@@ -22,6 +22,8 @@ class CpfCnpjValidator extends ConstraintValidator
             return;
         }
 
+        $docNumeroLimpo = preg_replace('/[^0-9]/', '', $docNumero);
+
         if ($docTipo === 'CPF') {
             if (!v::cpf()->validate($docNumero)) {
                 $this->context->buildViolation($constraint->message)
