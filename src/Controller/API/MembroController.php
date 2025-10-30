@@ -24,6 +24,75 @@ class MembroController extends AbstractController
         private MembroRepository $membroRepository 
     ) {}
 
+    #[Route('/membro/{id}/transferir', name: 'api_membro_transfer', methods: ['POST'])]
+    public function transferirMembro(int $id, Request $request): JsonResponse
+    {
+        $membro = $this->membroRepository->find($id);
+        if (!$membro) {
+            return $this->json(['error' => 'Membro não encontrado.'], Response::HTTP_NOT_FOUND); 
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $igrejaDestinoId = $data['igrejaDestinoId'] ?? null;
+
+        if (!$igrejaDestinoId) {
+            return $this->json(['error' => 'O campo igrejaDestinoId é obrigatório.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $igrejaDestino = $this->igrejaRepository->find($igrejaDestinoId);
+        if (!$igrejaDestino) {
+            return $this->json(['error' => 'A igreja de destino não foi encontrada.'], Response::HTTP_NOT_FOUND); // 404
+        }
+
+
+        if ($membro->getIgreja()->getId() === $igrejaDestino->getId()) {
+            return $this->json(['error' => 'O membro já pertence a esta igreja.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $dataUltimaTransferencia = $membro->getDataUltimaTransferencia();
+        if ($dataUltimaTransferencia !== null) {
+            $hoje = new \DateTime();
+            $diferencaDias = $dataUltimaTransferencia->diff($hoje)->days;
+
+            if ($diferencaDias < 10) {
+                return $this->json(
+                    ['error' => 'Este membro só pode ser transferido novamente em ' . (10 - $diferencaDias) . ' dias.'],
+                    Response::HTTP_CONFLICT 
+                );
+            }
+        }
+
+        $email = $membro->getEmail();
+        $existingMembro = $this->membroRepository->findOneBy(['email' => $email, 'igreja' => $igrejaDestino]);
+        if ($existingMembro) {
+            return $this->json(
+                ['error' => 'A igreja de destino já possui um membro com este e-mail.'],
+                Response::HTTP_CONFLICT 
+            );
+        }
+
+        if ($igrejaDestino->getMembros()->count() >= $igrejaDestino->getLimiteMembros()) {
+            return $this->json(
+                ['error' => 'A igreja de destino já atingiu seu limite máximo de membros.'],
+                Response::HTTP_CONFLICT 
+            );
+        }
+
+
+        $membro->setIgreja($igrejaDestino); 
+        $membro->setDataUltimaTransferencia(new \DateTime()); 
+        $membro->setDataUltimaAlteracao(new \DateTime()); 
+
+        $this->em->flush();
+
+        return $this->json(
+            $membro,
+            Response::HTTP_OK, 
+            [],
+            ['groups' => ['membro:read', 'igreja:read']]
+        );
+    }
+
     #[Route('/membro/{id}', name: 'api_membro_delete', methods: ['DELETE'])]
     public function deleteMembro(int $id): JsonResponse
     {

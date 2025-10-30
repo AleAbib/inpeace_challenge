@@ -94,6 +94,10 @@ class Membro
     #[Groups(['membro:read'])]
     private ?Igreja $igreja = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['membro:read'])] 
+    private ?\DateTimeInterface $dataUltimaTransferencia = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -275,6 +279,17 @@ class Membro
     public function setIgreja(?Igreja $igreja): static
     {
         $this->igreja = $igreja;
+
+        return $this;
+    }
+    public function getDataUltimaTransferencia(): ?\DateTimeInterface
+    {
+        return $this->dataUltimaTransferencia;
+    }
+
+    public function setDataUltimaTransferencia(?\DateTimeInterface $dataUltimaTransferencia): static
+    {
+        $this->dataUltimaTransferencia = $dataUltimaTransferencia;
 
         return $this;
     }
