@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use App\Validator as CustomAssert;
 
 #[ORM\Entity(repositoryClass: IgrejaRepository::class)]
+#[CustomAssert\CpfCnpj]
 class Igreja
 {
     #[ORM\Id]

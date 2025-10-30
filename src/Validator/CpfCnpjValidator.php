@@ -5,7 +5,7 @@ namespace App\Validator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Respect\Validation\Validator as v; 
+use Respect\Validation\Validator as v;
 
 class CpfCnpjValidator extends ConstraintValidator
 {
@@ -22,17 +22,18 @@ class CpfCnpjValidator extends ConstraintValidator
             return;
         }
 
+        // Limpeza de robustez: remove caracteres não numéricos
         $docNumeroLimpo = preg_replace('/[^0-9]/', '', $docNumero);
 
         if ($docTipo === 'CPF') {
-            if (!v::cpf()->validate($docNumero)) {
+            if (!v::cpf()->validate($docNumeroLimpo)) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ tipo }}', 'CPF')
-                    ->atPath($constraint->docNumeroField) 
+                    ->atPath($constraint->docNumeroField)
                     ->addViolation();
             }
         } elseif ($docTipo === 'CNPJ') {
-            if (!v::cnpj()->validate($docNumero)) {
+            if (!v::cnpj()->validate($docNumeroLimpo)) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ tipo }}', 'CNPJ')
                     ->atPath($constraint->docNumeroField)
